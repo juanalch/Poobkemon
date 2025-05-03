@@ -1,30 +1,29 @@
 package domain;
+import java.util.*;
 
 public class POOBkemon {
 
 	private String gameMode;
-
 	private int modality;
-
 	private Battle battle;
 
-	public void _(String game Mode, String gameModality, Trainer trainer1, Trainer trainer2) {
+	public POOBkemon(String gameMode, String gameModality, Trainer trainer1, Trainer trainer2) {
 
 	}
 
-	public ArrayList getAvailablePokemons() {
+	public ArrayList<Pokemon> getAvailablePokemons() {
 		return null;
 	}
 
-	public ArrayList getAlvailableItems() {
+	public ArrayList<Item> getAlvailableItems() {
 		return null;
 	}
 
-	public void selectTrainerPokemons(Trainer trainer, ArrayList pokemonNames) {
+	public void selectTrainerPokemons(Trainer trainer, ArrayList <String>pokemonNames) {
 
 	}
 
-	public void selectTrainerItems(Trainer trainer, ArrayList itemNames) {
+	public void selectTrainerItems(Trainer trainer, ArrayList<String> itemNames) {
 
 	}
 
@@ -48,11 +47,11 @@ public class POOBkemon {
 
 	}
 
-	public ArrayList getTrainerTeam(Trainer trainer) {
+	public ArrayList<Pokemon> getTrainerTeam(Trainer trainer) {
 		return null;
 	}
 
-	public ArrayList getTrainerItems(Trainer trainer) {
+	public ArrayList<Item> getTrainerItems(Trainer trainer) {
 		return null;
 	}
 

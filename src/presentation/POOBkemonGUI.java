@@ -1,14 +1,12 @@
 package presentation;
 
 import domain.POOBkemon;
-import javax.JFrame;
+import javax.swing.JFrame;
 
 public class POOBkemonGUI {
 
 	private static POOBkemonGUI instance;
-
 	private POOBkemon game;
-
 	private JFrame currentScreen;
 
 	public void showGameCover() {

@@ -1,18 +1,15 @@
 package domain;
+import java.util.*; 
 
 public abstract class Trainer {
 
 	protected String name;
-
 	protected String color;
-
 	protected String type;
+	protected Pokemon[] pokemon;
+	protected Item[] item;
 
-	private Pokemon[] pokemon;
-
-	private Item item;
-
-	public void _(String name, String color, String type) {
+	public Trainer(String name, String color, String type) {
 
 	}
 
@@ -28,11 +25,11 @@ public abstract class Trainer {
 
 	}
 
-	public ArrayList getTeam() {
+	public ArrayList<Pokemon> getTeam() {
 		return null;
 	}
 
-	public ArrayList getItems() {
+	public ArrayList<Item> getItems() {
 		return null;
 	}
 
