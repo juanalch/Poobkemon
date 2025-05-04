@@ -135,12 +135,16 @@ public class Battle {
     
 
 
-    private void endBattle(String message) {
+    public void endBattle(String message) {
         battleEnded = true;
 		if (turnTimer != null) {
             turnTimer.cancel();
 		}
         log(message);
+    }
+
+    public boolean isBattleEnded(){
+        return this.battleEnded;
     }
 
     private void log(String msg) {

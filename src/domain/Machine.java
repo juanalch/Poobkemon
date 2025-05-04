@@ -14,4 +14,9 @@ public abstract class Machine extends Trainer {
             .filter(m -> m.getEffect().getClass().equals(effectType))
             .findFirst();
     }
+
+    @Override
+    public boolean isHuman(){
+        return false;
+    }
 }

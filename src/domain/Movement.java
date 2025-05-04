@@ -1,6 +1,6 @@
 package domain;
 
-public class Movement {
+public class Movement implements Cloneable{
     protected String name;
     protected String type;
     protected String movementClass;
@@ -12,7 +12,7 @@ public class Movement {
     protected MovementEffect effect;  // Para manejar efectos secundarios
 
     public Movement(String name, String type, int power, int accuracy, 
-                   int pp, int priority, MovementEffect effect) {
+                   int pp, int priority) {
         this.name = name;
         this.type = type;
         this.power = power;
@@ -20,10 +20,17 @@ public class Movement {
         this.maxPP = pp;
         this.currentPP = pp;
         this.priority = priority;
-        this.effect = effect;
+        
     }
 	
-
+    @Override
+    public Movement clone() {
+        try {
+            return (Movement) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // Nunca ocurrirá
+        }
+    }
 
 	
     // Getters

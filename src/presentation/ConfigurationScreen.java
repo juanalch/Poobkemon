@@ -34,7 +34,7 @@ public class ConfigurationScreen extends JPanel {
     JLabel backgroundLabel = new JLabel();
     try {
         // Cargar la imagen original
-        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/config_bg.gif"));
+        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/jugadores.jpg"));
         // Escalar al tamaño deseado (800x600)
         Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_DEFAULT);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);

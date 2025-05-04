@@ -27,7 +27,7 @@ public class ModalityScreen extends JPanel {
     JLabel backgroundLabel = new JLabel();
     try {
         // Cargar la imagen original
-        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/modality_bg.gif"));
+        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/modality.gif"));
         // Escalar al tamaño deseado (800x600)
         Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_DEFAULT);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);

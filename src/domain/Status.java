@@ -1,11 +1,11 @@
 package domain;
 
-public class State extends Movement {
+public class Status extends Movement {
     
     // Constructor directo con enum MovementEffect
-    public State(String name, String type, int power, int accuracy, 
-                int pp, int priority, MovementEffect effect) {
-        super(name, type, power, accuracy, pp, priority, effect);
+    public Status(String name, String type, int power, int accuracy, 
+                int pp, int priority) {
+        super(name, type, 0, accuracy, pp, priority);
         this.movementClass = "STATE";
     }
 

@@ -1,6 +1,6 @@
 package domain;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 public class POOBkemon {
     public enum GameMode { NORMAL, SURVIVAL }
@@ -93,15 +93,15 @@ public class POOBkemon {
     private void validateModality(Trainer t1, Trainer t2) {
         switch (modality) {
             case PvP:
-                if (!(t1 instanceof Person) || !(t2 instanceof Person))
+                if (!t1.isHuman() || !t2.isHuman()) 
                     throw new IllegalArgumentException("PvP requiere dos jugadores humanos");
                 break;
             case PvM:
-                if (!(t1 instanceof Person) || !(t2 instanceof Machine))
+                if (!t1.isHuman() || t2.isHuman()) 
                     throw new IllegalArgumentException("PvM requiere un humano vs máquina");
                 break;
             case MvM:
-                if (!(t1 instanceof Machine) || !(t2 instanceof Machine))
+                if (t1.isHuman() || t2.isHuman()) 
                     throw new IllegalArgumentException("MvM requiere dos máquinas");
                 break;
         }

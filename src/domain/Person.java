@@ -3,112 +3,168 @@ package domain;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Person extends Trainer {
-    private transient BattleDecisionProvider decisionProvider;
+    
 
     public Person(String name, String color) {
         super(name, color, true);
     }
+    
+    
+    @Override
+    public boolean isHuman(){
+        return true;
+    }
 
     @Override
-    public void decideAction(Battle battle) {
-        if (decisionProvider == null) {
-            throw new IllegalStateException("Proveedor de decisiones no configurado");
-        }
-
-        try {
-            BattleAction action = decisionProvider.getNextAction();
-            validateAction(action);
-            battle.queueAction(action);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+public void decideAction(Battle battle) {
+    // Obtener el Pokémon activo del jugador
+    Pokemon activePokemon = getActivePokemon();
+    
+    // Simular interfaz de usuario (ej: botones en GUI o entrada por consola)
+    // 1. Mostrar opciones al jugador: [Atacar] [Cambiar Pokémon] [Usar Ítem] [Huir]
+    // 2. Capturar la elección del jugador (depende de la implementación de la UI)
+    int chosenOption = 0; // Mock: Reemplazar con lógica real de UI
+    
+    switch (chosenOption) {
+        case 0: // Atacar
+            handleAttackAction();
+            break;
+        case 1: // Cambiar Pokémon
+            handleSwitchAction();
+            break;
+        case 2: // Usar Ítem
+            handleItemAction();
+            break;
+        case 3: // Huir
             battle.queueAction(BattleAction.createFleeAction());
-            System.err.println("Interrupción en la toma de decisiones: " + e.getMessage());
-        }
+            break;
+        default:
+            throw new GameException("Acción no válida");
     }
-
-    // -------------------- Validaciones mejoradas --------------------
-    private void validateAction(BattleAction action) {
-        Objects.requireNonNull(action, "Acción no puede ser nula");
+}
+private BattleAction handleAttackAction() {
+        Pokemon attacker = getActivePokemon();
+        List<Movement> moves = getUsableMoves(attacker);
         
-        switch (action.getActionType()) {
-            case MOVE -> validateMove(action.getMove());
-            case SWITCH -> validateSwitch(action.getNewPokemon());
-            case ITEM -> validateItem(action.getItem(), action.getTarget());
-            default -> throw new IllegalArgumentException("Tipo de acción no válido");
-        }
-    }
-
-    private void validateMove(Movement move) {
-        if (!getActivePokemon().getMovements().contains(move)) {
-            throw new IllegalArgumentException("Movimiento no aprendido");
-        }
-        if (move.getCurrentPP() <= 0) {
-            throw new IllegalStateException("PP del movimiento agotados");
-        }
-    }
-
-    private void validateSwitch(Pokemon newPokemon) {
-        if (!getPokemonTeam().contains(newPokemon)) {
-            throw new IllegalArgumentException("Pokémon no pertenece al equipo");
-        }
-        if (newPokemon.isFainted()) {
-            throw new IllegalStateException("No se puede cambiar a Pokémon debilitado");
-        }
-    }
-
-    private void validateItem(Item item, Pokemon target) {
-        if (!getItems().contains(item)) {
-            throw new IllegalArgumentException("Ítem no disponible");
-        }
-        if (item instanceof Revive) {
-            if (!target.isFainted()) {
-                throw new IllegalStateException("Revive solo para Pokémon debilitados");
-            }
-        } else if (target.isFainted()) {
-            throw new IllegalStateException("No se puede usar ítem en Pokémon debilitado");
-        }
-    }
-
-    // -------------------- Gestión de configuración mejorada --------------------
-    public void setTeam(List<Pokemon> team) {
-        if (team.size() < 2 || team.size() > 6) {
-            throw new IllegalArgumentException("El equipo debe tener entre 2 y 6 Pokémon");
+        if (moves.isEmpty()) {
+            throw new GameException("¡No quedan movimientos disponibles!");
         }
         
-        this.pokemonTeam.clear();
-        this.pokemonTeam.addAll(team);
-        this.activePokemon = team.stream()
+        Movement move = selectMove(moves);
+        return BattleAction.createMoveAction(move);
+    }
+
+    private List<Movement> getUsableMoves(Pokemon pokemon) {
+        return pokemon.getMovements().stream()
+            .filter(m -> m.getCurrentPP() > 0)
+            .collect(Collectors.toList());
+    }
+
+    public Movement selectMove(List<Movement> moves) {
+        // Implementar selector de movimientos en UI
+        return moves.get(0); // Mock
+    }
+
+    // ================== MANEJO DE CAMBIO ==================
+    
+    private BattleAction handleSwitchAction() {
+        List<Pokemon> available = getSwitchablePokemon();
+        
+        if (available.isEmpty()) {
+            throw new GameException("¡No hay Pokémon disponibles para cambiar!");
+        }
+        
+        Pokemon target = selectPokemon(available);
+        return BattleAction.createSwitchAction(target);
+    }
+
+    private List<Pokemon> getSwitchablePokemon() {
+        return getPokemonTeam().stream()
             .filter(p -> !p.isFainted())
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Equipo debe tener al menos 1 Pokémon sano"));
+            .filter(p -> p != getActivePokemon())
+            .collect(Collectors.toList());
     }
 
-    public void setItems(List<Item> items) {
-        if (items.size() > 4) {
-            throw new IllegalArgumentException("Límite de 4 ítems");
+    public Pokemon selectPokemon(List<Pokemon> available) {
+        // Implementar selector de Pokémon en UI
+        return available.get(0); // Mock
+    }
+
+    // ================== MANEJO DE ÍTEMS ==================
+    
+    private BattleAction handleItemAction() {
+        List<Item> usableItems = filterUsableItems();
+        
+        if (usableItems.isEmpty()) {
+            throw new GameException("¡No hay ítems utilizables!");
         }
         
-        this.items.clear();
-        this.items.addAll(items);
+        Item item = selectItem(usableItems);
+        Pokemon target = selectItemTarget(item);
+        return BattleAction.createItemAction(item, target);
     }
 
-    // -------------------- Interfaz para UI --------------------
-    public interface BattleDecisionProvider {
-        BattleAction getNextAction() throws InterruptedException;
+    private List<Item> filterUsableItems() {
+        return getItems().stream()
+            .filter(this::validateItemUsage)
+            .collect(Collectors.toList());
     }
 
-    public void setDecisionProvider(BattleDecisionProvider provider) {
-        this.decisionProvider = Objects.requireNonNull(provider, "Proveedor no puede ser nulo");
+    private boolean validateItemUsage(Item item) {
+        if (item instanceof Revive) {
+            return hasFaintedPokemon();
+        }
+        return true;
     }
 
-    // -------------------- Métodos auxiliares --------------------
-    public List<Pokemon> getUnfaintedTeamMembers() {
-        return Collections.unmodifiableList(
-            pokemonTeam.stream()
-                .filter(p -> !p.isFainted())
-                .toList()
-        );
+    private boolean hasFaintedPokemon() {
+        return getPokemonTeam().stream()
+            .anyMatch(Pokemon::isFainted);
     }
+
+    public Item selectItem(List<Item> items) {
+        // Implementar selector de ítems en UI
+        return items.get(0); // Mock
+    }
+
+    public Pokemon selectItemTarget(Item item) {
+        if (item instanceof Revive) {
+            return selectFaintedPokemon();
+        }
+        return getActivePokemon(); // Pociones aplican al activo por defecto
+    }
+
+    private Pokemon selectFaintedPokemon() {
+        List<Pokemon> fainted = getPokemonTeam().stream()
+            .filter(Pokemon::isFainted)
+            .collect(Collectors.toList());
+        
+        return selectPokemon(fainted);
+    }
+
+    // ================== VALIDACIONES ==================
+    
+    @Override
+    public void addItem(Item item) {
+        validateItemLimits(item);
+        super.addItem(item);
+    }
+
+    private void validateItemLimits(Item item) {
+        long count = getItems().stream()
+            .filter(i -> i.getClass().equals(item.getClass()))
+            .count();
+        
+        if (item instanceof Potion && count >= 2) {
+            throw new GameException("¡Límite de pociones alcanzado (máx 2)!");
+        }
+        
+        if (item instanceof Revive && count >= 1) {
+            throw new GameException("¡Solo se permite un Revive!");
+        }
+    }
+
 }

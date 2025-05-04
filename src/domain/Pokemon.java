@@ -109,6 +109,7 @@ public class Pokemon {
         return health;
     }
 
+
     public int getCurrentHealth() {
         return currentHealth;
     }
@@ -149,7 +150,9 @@ public class Pokemon {
         return level;
     }
 
-	
+	public int setLevel(int level){
+        return this.level = level;
+    }
 
     public void setActive(boolean active) {
         this.active = active;

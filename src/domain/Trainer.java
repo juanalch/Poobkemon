@@ -74,9 +74,8 @@ public abstract class Trainer {
         return pokemonTeam.stream().anyMatch(p -> !p.isFainted());
     }
 
-    public boolean isHuman() {
-        return isHuman;
-    }
+    public abstract boolean isHuman();
+
 
     public String getName() {
         return name;
