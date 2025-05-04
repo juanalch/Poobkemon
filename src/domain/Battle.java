@@ -1,24 +1,174 @@
+
 package domain;
+import java.util.*;
 
 public class Battle {
+    private Trainer trainer1;
+    private Trainer trainer2;
+    private Trainer currentTrainer;
+    private Trainer opponent;
+    private Timer turnTimer;
+    private boolean battleEnded;
+    private Queue<BattleAction> actionQueue = new ArrayDeque<>();
+    
+    public Battle(Trainer trainer1, Trainer trainer2) {
+        if (trainer1 == null || trainer2 == null) throw new IllegalArgumentException("Entrenadores inválidos");
+        this.trainer1 = trainer1;
+        this.trainer2 = trainer2;
+        this.currentTrainer = decideFirstTurn(trainer1, trainer2);
+        this.opponent = (currentTrainer == trainer1) ? trainer2 : trainer1;
+        validateTeams();
+    }
+	private Trainer decideFirstTurn(Trainer t1, Trainer t2) {
+        return Math.random() < 0.5 ? t1 : t2;
+    }
 
-	private Trainer trainer1;
-	private Trainer trainer2;
-	private int currentTurn;
-	private int timer = 20;
+	public void startBattle() {
+        while (!battleEnded) {
+            currentTrainer.decideAction(this);
+            processActions();
+            checkBattleEnd();
+            switchTurn();
+        }
+    }
 
 
+	private void switchTurn() {
+        Trainer temp = currentTrainer;
+        currentTrainer = opponent;
+        opponent = temp;
+    }
 
-	public Battle(Trainer trainer1, Trainer trainer2) {
+    public Trainer getOpponent(Trainer trainer) {
+        return trainer == trainer1 ? trainer2 : trainer1;
+    }
 
+	public Trainer getCurrentTrainer(){
+		return this.currentTrainer;
 	}
 
-	public void getCurrentTurn() {
-
+	public List<Trainer> getTrainers(){
+		return List.of(trainer1, trainer2);
 	}
 
-	public void executePlayerAction(String movementType, String movementClass, Pokemon selectedPokemon, Item selectedItem) {
+    private void validateTeams() {
+        if (trainer1.getPokemonTeam().size() < 2 || trainer2.getPokemonTeam().size() < 2) {
+            throw new IllegalArgumentException("Equipos inválidos");
+        }
+    }
 
-	}
+    private void processActions() {
+        while (!actionQueue.isEmpty()) {
+            BattleAction action = actionQueue.poll();
+            executeAction(action);
+        }
+    }
 
+    private void executeAction(BattleAction action) {
+        switch (action.getActionType()) {
+            case MOVE:
+                handleMoveAction(action);
+                break;
+            case SWITCH:
+                handleSwitchAction(action);
+                break;
+            case ITEM:
+                handleItemAction(action);
+                break;
+            case FLEE:
+                endBattle(currentTrainer.getName() + " huyó!");
+                break;
+        }
+        switchTurn();
+    }
+
+    private void handleMoveAction(BattleAction action) {
+        Movement move = action.getMove();
+        Pokemon attacker = currentTrainer.getActivePokemon();
+        Pokemon defender = opponent.getActivePokemon();
+        
+        int damage = attacker.calculateDamage(move, defender);
+        defender.takeDamage(damage);
+        move.reducePP(1);
+        log(attacker.getName() + " usa " + move.getName() + " (" + damage + " daño)");
+    }
+
+	private void handleSwitchAction(BattleAction action) {
+        Pokemon newPokemon = action.getNewPokemon();
+        Trainer trainer = currentTrainer;
+        
+        // Validaciones
+        if (!trainer.getPokemonTeam().contains(newPokemon)) {
+            throw new GameException("Pokémon no pertenece al equipo");
+        }
+        if (newPokemon.isFainted()) {
+            throw new GameException("No se puede cambiar a un Pokémon debilitado");
+        }
+        
+        // Cambiar Pokémon activo
+        trainer.switchPokemon(newPokemon);
+        log(trainer.getName() + " cambia a " + newPokemon.getName());
+        
+        
+    }
+
+    private void handleItemAction(BattleAction action) {
+        Item item = action.getItem();
+        Pokemon target = action.getTarget();
+        Trainer trainer = currentTrainer;
+        
+        // Validaciones
+        if (!trainer.getItems().contains(item)) {
+            throw new GameException("El entrenador no posee este ítem");
+        }
+        if (item instanceof Revive && !target.isFainted()) {
+            throw new GameException("Revive solo funciona en Pokémon debilitados");
+        }
+        
+        // Aplicar efecto del ítem
+        item.applyEffect(target);
+        trainer.getItems().remove(item);
+        log(trainer.getName() + " usa " + item.getName() + " en " + target.getName());
+    }
+
+      
+    
+
+
+    private void endBattle(String message) {
+        battleEnded = true;
+		if (turnTimer != null) {
+            turnTimer.cancel();
+		}
+        log(message);
+    }
+
+    private void log(String msg) {
+        System.out.println(msg);
+    }
+
+	private void checkBattleEnd() {
+        // Verificar si algún entrenador perdió todos sus Pokémon
+        boolean trainer1Lost = !trainer1.hasAvailablePokemon();
+        boolean trainer2Lost = !trainer2.hasAvailablePokemon();
+        
+        if (trainer1Lost || trainer2Lost) {
+            String winnerMessage;
+            
+            if (trainer1Lost && trainer2Lost) {
+                winnerMessage = "¡Empate! Ambos entrenadores perdieron sus Pokémon";
+            } else if (trainer1Lost) {
+                winnerMessage = trainer2.getName() + " gana la batalla!";
+            } else {
+                winnerMessage = trainer1.getName() + " gana la batalla!";
+            }
+            
+            endBattle(winnerMessage);
+        }
+    }
+	public void queueAction(BattleAction action) {
+        actionQueue.add(action); // Añade la acción a la cola
+    }
 }
+
+
