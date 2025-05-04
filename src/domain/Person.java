@@ -1,9 +1,8 @@
 
 package domain;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 public class Person extends Trainer {
     private transient BattleDecisionProvider decisionProvider;
