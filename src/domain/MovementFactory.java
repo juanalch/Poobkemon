@@ -61,4 +61,16 @@ public class MovementFactory {
     public static List<String> getAllMovementNames() {
         return new ArrayList<>(movementCatalog.keySet());
     }
+
+    public class MachineFactory {
+        public static Machine createMachine(String type) {
+            return switch(type.toLowerCase()) {
+                case "defensive" -> new DefensiveTrainer();
+                case "attacking" -> new AttackingTrainer();
+                case "changing" -> new ChangingTrainer();
+                case "expert" -> new ExpertTrainer();
+                default -> throw new IllegalArgumentException("Tipo de máquina desconocido");
+            };
+        }
+    }
 }

@@ -57,7 +57,7 @@ public class Battle {
         }
     }
 
-    private void processActions() {
+    public void processActions() {
         while (!actionQueue.isEmpty()) {
             BattleAction action = actionQueue.poll();
             executeAction(action);
@@ -173,6 +173,11 @@ public class Battle {
 	public void queueAction(BattleAction action) {
         actionQueue.add(action); // Añade la acción a la cola
     }
+
+    public Battle getBattle() {
+        return this;
+    }
+
 }
 
 

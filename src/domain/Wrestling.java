@@ -2,7 +2,7 @@ package domain;
 
 public class Wrestling extends Movement {
     public Wrestling() {
-        super("Forcejeo", "NORMAL", 50, 100, Integer.MAX_VALUE, 0, null);
+        super("Forcejeo", "NORMAL", 50, 100, Integer.MAX_VALUE, 0);
         this.movementClass = "PHYSICAL";
     }
 

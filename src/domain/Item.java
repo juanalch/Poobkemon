@@ -1,5 +1,7 @@
 package domain;
 
+import java.util.List;
+
 public abstract class Item {
     protected final String name;
     
@@ -12,4 +14,7 @@ public abstract class Item {
     public String getName() {
         return name;
     }
+    public abstract List<Pokemon> getValidTargets(Trainer trainer);
 }
+    
+

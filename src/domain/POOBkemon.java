@@ -89,6 +89,13 @@ public class POOBkemon {
         return trainer.getItems();
     }
 
+    
+    public Battle getBattle() {
+        return this.battle;
+    }
+
+    
+
     // -------------------- Métodos internos --------------------
     private void validateModality(Trainer t1, Trainer t2) {
         switch (modality) {
@@ -123,4 +130,5 @@ public class POOBkemon {
     public void saveGame() {
         // Lógica para serializar el estado del juego
     }
+
 }

@@ -9,14 +9,11 @@ import java.awt.event.ActionListener;
  */
 public class ConfigurationScreen extends JPanel {
 
-    // Componentes básicos
     private JTextField player1NameField, player2NameField;
     private JButton player1ColorBtn, player2ColorBtn;
     private JButton startBattleButton;
     private Color player1Color = Color.RED;
     private Color player2Color = Color.BLUE;
-
-    // Configuración recibida
     private String modality;
     private String mode;
 
@@ -27,29 +24,29 @@ public class ConfigurationScreen extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new OverlayLayout(this));
+        setLayout(new OverlayLayout(this)); // Layout para superponer componentes
 
-        // Fondo animado
-        // En GameCover.java, ModalityScreen.java y ConfigurationScreen.java
-    JLabel backgroundLabel = new JLabel();
-    try {
-        // Cargar la imagen original
-        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/jugadores.jpg"));
-        // Escalar al tamaño deseado (800x600)
-        Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_DEFAULT);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-        backgroundLabel.setIcon(scaledIcon);
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al cargar el GIF", "Error", JOptionPane.ERROR_MESSAGE);
-    }
+        // --- Imagen de fondo centrada ---
+        JLabel backgroundLabel = new JLabel();
+        try {
+            ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/jugadores.jpg"));
+            Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_SMOOTH);
+            backgroundLabel.setIcon(new ImageIcon(scaledImage));
+            backgroundLabel.setHorizontalAlignment(JLabel.CENTER); // Centrado horizontal
+            backgroundLabel.setVerticalAlignment(JLabel.CENTER); // Centrado vertical
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar la imagen", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        backgroundLabel.setAlignmentX(0.5f); // Centrado en OverlayLayout
+        backgroundLabel.setAlignmentY(0.5f);
 
-        // Panel de contenido principal
+        // --- Panel de contenido (transparente y centrado) ---
         JPanel contentPanel = new JPanel();
         contentPanel.setOpaque(false);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(100, 20, 20, 20)); // Margen superior aumentado
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(100, 20, 20, 20));
 
-        // Sección Jugador 1
+        // Sección Jugador 1 (excepto en MvM)
         if (!modality.equals("MvM")) {
             contentPanel.add(createPlayerSection("Jugador 1", true));
             contentPanel.add(Box.createVerticalStrut(30));
@@ -64,18 +61,20 @@ public class ConfigurationScreen extends JPanel {
         // Botón de inicio
         startBattleButton = new JButton("¡Empezar Batalla!");
         styleButton(startBattleButton);
-        startBattleButton.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar botón
+        startBattleButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         contentPanel.add(startBattleButton);
 
-        add(contentPanel);
-        add(backgroundLabel);
+        // Añadir componentes al panel principal
+        add(contentPanel); // Controles encima
+        add(backgroundLabel); // Fondo debajo
     }
 
+    // Método para crear secciones de jugador
     private JPanel createPlayerSection(String title, boolean isPlayer1) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         panel.setOpaque(false);
-        panel.setMaximumSize(new Dimension(500, 50)); // Limitar ancho
+        panel.setMaximumSize(new Dimension(500, 50));
 
         JLabel titleLabel = new JLabel(title + ":");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
@@ -89,7 +88,7 @@ public class ConfigurationScreen extends JPanel {
         colorBtn.setBackground(isPlayer1 ? player1Color : player2Color);
         colorBtn.setFocusPainted(false);
 
-        // Asignar componentes a variables
+        // Asignar a variables
         if (isPlayer1) {
             player1NameField = nameField;
             player1ColorBtn = colorBtn;
@@ -107,6 +106,7 @@ public class ConfigurationScreen extends JPanel {
         return panel;
     }
 
+    // Método para elegir color
     private void chooseColor(boolean isPlayer1) {
         Color color = JColorChooser.showDialog(this, "Elige un color", isPlayer1 ? player1Color : player2Color);
         if (color != null) {
@@ -120,14 +120,15 @@ public class ConfigurationScreen extends JPanel {
         }
     }
 
+    // Estilo del botón
     private void styleButton(JButton button) {
         button.setFont(new Font("Arial", Font.BOLD, 18));
         button.setForeground(Color.WHITE);
-        button.setBackground(new Color(0, 100, 200)); // Azul neutro
+        button.setBackground(new Color(0, 100, 200));
         button.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
     }
 
-    // Getters para obtener datos
+    // Getters
     public String getPlayer1Name() { return player1NameField.getText(); }
     public String getPlayer2Name() { return modality.equals("PvP") ? player2NameField.getText() : "Máquina"; }
     public Color getPlayer1Color() { return player1Color; }
