@@ -52,17 +52,44 @@ public class BattleScreen extends JPanel {
         Pokemon active = battle.getCurrentTrainer().getActivePokemon();
         
         for (int i = 0; i < 4; i++) {
-            Movement move = active.getMovements().get(i);
-            moveButtons[i] = new JButton(move.getName());
-            int finalI = i;
-            moveButtons[i].addActionListener(e -> {
-                battle.queueAction(BattleAction.createMoveAction(move));
-                battle.processActions();
-                updateBattleState();
-            });
-            panel.add(moveButtons[i]);
+            if (i < active.getMovements().size()) {
+                Movement move = active.getMovements().get(i);
+                JButton btn = new JButton(move.getName() + " (" + move.getCurrentPP() + ")");
+                btn.setEnabled(move.getCurrentPP() > 0);
+                btn.addActionListener(e -> {
+                    battle.queueAction(BattleAction.createMoveAction(move));
+                    battle.processActions();
+                });
+                panel.add(btn);
+            } else {
+                panel.add(new JLabel(""));
+            }
         }
         return panel;
+    }
+
+    public void updateBattleState() {
+        Trainer current = battle.getCurrentTrainer();
+        
+        // Actualizar estadísticas Pokémon
+        List<Pokemon> team = current.getPokemonTeam();
+        for (int i = 0; i < 6; i++) {
+            if (i < team.size()) {
+                Pokemon p = team.get(i);
+                String status = p.getName() + " HP: " + p.getCurrentHealth() + 
+                              (p.isFainted() ? " (DEBILITADO)" : "");
+                playerPokemonStats[i].setText(status);
+            }
+        }
+        
+        // Actualizar botones de movimientos
+        Component[] components = ((JPanel)getComponent(2)).getComponents();
+        if (components.length > 0 && components[0] instanceof JPanel) {
+            JPanel movePanel = (JPanel) components[0];
+            movePanel.removeAll();
+            movePanel.add(createMoveButtons());
+            movePanel.revalidate();
+        }
     }
 
     private JPanel createActionButtons() {
@@ -81,18 +108,6 @@ public class BattleScreen extends JPanel {
         panel.add(itemBtn);
         panel.add(fleeBtn);
         return panel;
-    }
-
-    public void updateBattleState() {
-        Trainer current = battle.getCurrentTrainer();
-        // Actualizar estadísticas Pokémon
-        for (int i = 0; i < 6; i++) {
-            Pokemon p = current.getPokemonTeam().get(i);
-            playerPokemonStats[i].setText(p.getName() + " HP: " + p.getCurrentHealth());
-        }
-        
-        // Actualizar log
-        battleLog.append("Turno de: " + current.getName() + "\n");
     }
 
     private void showSwitchDialog() {

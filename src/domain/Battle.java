@@ -51,11 +51,6 @@ public class Battle {
 		return List.of(trainer1, trainer2);
 	}
 
-    private void validateTeams() {
-        if (trainer1.getPokemonTeam().size() < 2 || trainer2.getPokemonTeam().size() < 2) {
-            throw new IllegalArgumentException("Equipos inválidos");
-        }
-    }
 
     public void processActions() {
         while (!actionQueue.isEmpty()) {
@@ -80,17 +75,6 @@ public class Battle {
                 break;
         }
         switchTurn();
-    }
-
-    private void handleMoveAction(BattleAction action) {
-        Movement move = action.getMove();
-        Pokemon attacker = currentTrainer.getActivePokemon();
-        Pokemon defender = opponent.getActivePokemon();
-        
-        int damage = attacker.calculateDamage(move, defender);
-        defender.takeDamage(damage);
-        move.reducePP(1);
-        log(attacker.getName() + " usa " + move.getName() + " (" + damage + " daño)");
     }
 
 	private void handleSwitchAction(BattleAction action) {
@@ -176,6 +160,42 @@ public class Battle {
 
     public Battle getBattle() {
         return this;
+    }
+    private void validateTeams() {
+        if (trainer1.getPokemonTeam().size() < 6 || 
+            trainer2.getPokemonTeam().size() < 6) {
+            throw new IllegalArgumentException("Cada entrenador debe tener 6 Pokémon");
+        }
+    }
+
+    public String getResultMessage() {
+        boolean t1Lost = !trainer1.hasAvailablePokemon();
+        boolean t2Lost = !trainer2.hasAvailablePokemon();
+        
+        if (t1Lost && t2Lost) return "¡Empate!";
+        if (t1Lost) return trainer2.getName() + " es el ganador!";
+        return trainer1.getName() + " es el ganador!";
+    }
+
+    private void handleMoveAction(BattleAction action) {
+        Movement move = action.getMove();
+        Pokemon attacker = currentTrainer.getActivePokemon();
+        Pokemon defender = opponent.getActivePokemon();
+        
+        if (!move.checkAccuracy()) {
+            log(attacker.getName() + " falló " + move.getName());
+            return;
+        }
+        
+        int damage = attacker.calculateDamage(move, defender);
+        defender.takeDamage(damage);
+        move.reducePP(1);
+        log(attacker.getName() + " usa " + move.getName() + " (" + damage + " daño)");
+        
+        if (defender.isFainted()) {
+            log(defender.getName() + " se ha debilitado!");
+            opponent.notifyPokemonFainted(defender);
+        }
     }
 
 }

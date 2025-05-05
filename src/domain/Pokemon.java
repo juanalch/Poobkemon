@@ -156,6 +156,10 @@ public class Pokemon {
 
     public void setActive(boolean active) {
         this.active = active;
+        if (active) {
+            this.currentHealth = health; // Restaurar salud al activar
+            this.restoreAllPP();
+        }
     }
 
 	public void setDefense(int defense) {
