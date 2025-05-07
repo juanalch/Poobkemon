@@ -6,7 +6,6 @@ import domain.MovementFactory.MachineFactory;
 import javax.swing.*;
 import java.awt.*;
 
-
 public class POOBkemonGUI extends JFrame{
 
 	private static POOBkemonGUI instance;
@@ -68,7 +67,24 @@ public class POOBkemonGUI extends JFrame{
         setContentPane(configurationScreen);
         revalidate();
     }
-    public void startBattle() {
+	
+
+	public void startBattle() {
+
+        
+		// Validar datos básicos
+        if (configurationScreen.getPlayer1Name().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "¡El Jugador 1 necesita un nombre!", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Recoger datos de la pantalla de configuración
+        String player1Name = configurationScreen.getPlayer1Name();
+        String player2Name = configurationScreen.getPlayer2Name();
+        Color player1Color = configurationScreen.getPlayer1Color();
+        Color player2Color = configurationScreen.getPlayer2Color();
+
+        // TODO: Conectar con el dominio para crear la partida
         Trainer trainer1 = createTrainer(
             configurationScreen.getPlayer1Name(),
             configurationScreen.getPlayer1Color(),
@@ -81,8 +97,10 @@ public class POOBkemonGUI extends JFrame{
             currentModality.equals("PvP")
         );
         
+        // Configurar equipos
         configureTeams(trainer1, trainer2);
         
+        // Iniciar batalla
         game = new POOBkemon(
             currentModality.toUpperCase(),
             currentMode.toUpperCase(),
@@ -91,6 +109,8 @@ public class POOBkemonGUI extends JFrame{
         );
         
         showBattleScreen();
+        // Ejemplo de transición a BattleScreen (implementar después)
+        JOptionPane.showMessageDialog(this, "¡Batalla iniciada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private Trainer createTrainer(String name, Color color, boolean isHuman) {
@@ -100,19 +120,12 @@ public class POOBkemonGUI extends JFrame{
     }
 
     private void configureTeams(Trainer t1, Trainer t2) {
-        if (currentMode.equalsIgnoreCase("SURVIVAL")) {
+        if (currentMode.equals("SURVIVAL")) {
             t1.getPokemonTeam().addAll(PokemonFactory.getRandomSurvivalTeam());
             t2.getPokemonTeam().addAll(PokemonFactory.getRandomSurvivalTeam());
         } else {
-            // Modo normal: 6 Pokémon iniciales
-            List<Pokemon> baseTeam = PokemonFactory.getAllPokemons().subList(0, 6);
-            t1.getPokemonTeam().addAll(baseTeam);
-            t2.getPokemonTeam().addAll(baseTeam);
+            // Lógica para selección manual (implementar)
         }
-        
-        // Establecer Pokémon activo inicial
-        t1.getPokemonTeam().forEach(p -> p.setActive(true));
-        t2.getPokemonTeam().forEach(p -> p.setActive(true));
     }
 
     private void showBattleScreen() {
@@ -121,25 +134,16 @@ public class POOBkemonGUI extends JFrame{
         add(battleScreen);
         revalidate();
         repaint();
-
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                while (!game.isGameOver()) {
-                    Thread.sleep(1000);
-                    publish();
-                }
-                return null;
+        
+        // Iniciar ciclo de batalla
+        new Thread(() -> {
+            while (!game.isGameOver()) {
+                SwingUtilities.invokeLater(() -> {
+                    battleScreen.updateBattleState();
+                });
+                try { Thread.sleep(1000); } catch (InterruptedException e) {}
             }
-
-            @Override
-            protected void process(List<Void> chunks) {
-                battleScreen.updateBattleState();
-                if (game.isGameOver()) {
-                    battleScreen.showEndGameDialog(game.getBattle().getResultMessage());
-                }
-            }
-        }.execute();
+        }).start();
     }
 
     public static POOBkemonGUI getInstance() {
