@@ -8,6 +8,7 @@ public class Battle {
     private Trainer currentTrainer;
     private Trainer opponent;
     private Timer turnTimer;
+    private static final int ACTION_TIME_LIMIT = 20000; // 20 segundos
     private boolean battleEnded;
     private Queue<BattleAction> actionQueue = new ArrayDeque<>();
     
@@ -25,11 +26,23 @@ public class Battle {
 
 	public void startBattle() {
         while (!battleEnded) {
+            startTurnTimer();
             currentTrainer.decideAction(this);
             processActions();
             checkBattleEnd();
             switchTurn();
         }
+    }
+    private void startTurnTimer() {
+        turnTimer = new Timer();
+        turnTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // Si el tiempo se agota, se pasa el turno
+                log(currentTrainer.getName() + " no realizó una acción a tiempo. Pasando turno.");
+                switchTurn(); // Cambia al siguiente entrenador
+            }
+        }, ACTION_TIME_LIMIT);
     }
 
 
@@ -53,6 +66,13 @@ public class Battle {
 
 
     public void processActions() {
+        // Cancelar el temporizador si se pro
+        
+        cesan acciones
+        if (turnTimer != null) {
+            turnTimer.cancel();
+        }
+        
         while (!actionQueue.isEmpty()) {
             BattleAction action = actionQueue.poll();
             executeAction(action);

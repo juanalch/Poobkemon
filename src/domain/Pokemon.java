@@ -172,15 +172,14 @@ public class Pokemon {
 
 	
 
-    public void addMovement(Movement movement, int index) {
-        if (index >= 0 && index < 4) {
-            if (movements.size() > index) {
-                movements.set(index, movement);
-            } else {
-                movements.add(movement);
-            }
+    public void addMovement(Movement movement) {
+        if (movements.size() < 4) { // Check if there is space for a new movement
+            movements.add(movement);
+        } else {
+            System.out.println("Cannot add more movements. A Pokémon can have a maximum of 4 movements.");
         }
     }
+    
 
     // Método para verificar si el Pokémon puede atacar
     public boolean canAttack() {
@@ -217,5 +216,15 @@ public class Pokemon {
 
 	public void setAttack(int attack) {
         this.attack = Math.max(0, attack); // No permitir valores negativos
+    }
+
+    public void setHealth(int health){
+        this.currentHealth= health;
+    }
+    public void setSpecialAttack(int spAttack){
+        this.specialAttack= spAttack;
+    }
+    public void setSpecialDefense(int spDefense){
+        this.specialDefense= spDefense;
     }
 }

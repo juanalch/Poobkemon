@@ -21,7 +21,7 @@ public class POOBkemon {
 
     // -------------------- Métodos de configuración inicial --------------------
     public List<Pokemon> getAvailablePokemons() {
-        return PokemonFactory.getAllPokemons();
+        return PokemonFactory.getAvailablePokemons();
     }
 
     public List<Item> getAvailableItems() {
@@ -41,6 +41,7 @@ public class POOBkemon {
                 .forEach(trainer::addPokemon);
         }
     }
+    
 
     public void selectTrainerItems(Trainer trainer, List<String> itemNames) {
         if (gameMode == GameMode.SURVIVAL) return; // En supervivencia no hay ítems

@@ -1,9 +1,6 @@
 package presentation;
 
 import javax.swing.*;
-import domain.Pokemon;
-
-import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -22,10 +19,6 @@ public class POOBkemonGUI extends JFrame {
     // Game configuration
     private String currentModality;
     private String currentMode;
-    // Nuevas variables para manejar la selección de equipos
-    private boolean isPlayer1Turn = true;
-    private ArrayList<Pokemon> player1Team;
-    private ArrayList<Pokemon> player2Team;
     
     private POOBkemonGUI() {
         super("POOBkemon - ¡Conviértete en Maestro!");
@@ -100,51 +93,14 @@ public class POOBkemonGUI extends JFrame {
         configurationScreen.setBackAction(e -> showScreen("ModalityScreen"));
         
         // Team Screen -> Battle Screen or back
-        configurationScreen.setContinueAction(e -> {
-            if (validateConfiguration()) {
-                isPlayer1Turn = true; // Resetear al jugador 1
-                teamScreen.setPlayerSelection(true, 
-                    "Player vs Player".equals(currentModality) ? 
-                    configurationScreen.getPlayer1Name() : "Your Team");
-                teamScreen.updateForModality(currentModality);
-                showScreen("TeamScreen");
-            }
-        });
-        
-        // Team Screen -> Battle Screen or back
-        teamScreen.setContinueAction(e -> {
-            if (teamScreen.isTeamComplete()) {
-                if (isPlayer1Turn && "Player vs Player".equals(currentModality)) {
-                    // Guardar equipo del jugador 1 y preparar selección para jugador 2
-                    player1Team = new ArrayList<>(teamScreen.getSelectedPokemons());
-                    isPlayer1Turn = false;
-                    teamScreen.setPlayerSelection(false, configurationScreen.getPlayer2Name());
-                    teamScreen.updateForModality(currentModality);
-                    showScreen("TeamScreen");
-                } else {
-                    // Guardar equipo del jugador 2 o de la máquina y comenzar batalla
-                    player2Team = new ArrayList<>(teamScreen.getSelectedPokemons());
-                    startBattle();
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select 6 Pokémon", 
-                    "Incomplete Team", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-        
-        teamScreen.setBackAction(e -> {
-            if (isPlayer1Turn || !"Player vs Player".equals(currentModality)) {
-                showScreen("ConfigurationScreen");
-            } else {
-                // Volver a la selección del jugador 1 en PvP
-                isPlayer1Turn = true;
-                teamScreen.setPlayerSelection(true, configurationScreen.getPlayer1Name());
-                teamScreen.updateForModality(currentModality);
-            }
-        });
+        teamScreen.setContinueAction(e -> showScreen("BattleScreen"));
+        teamScreen.setBackAction(e -> showScreen("ConfigurationScreen"));
     }
     
-    
+    public void showConfigurationScreen() {
+        configurationScreen.updateForModality(currentModality);
+        showScreen("ConfigurationScreen");
+    }
     
     private boolean validateConfiguration() {
         if ("Player vs Player".equals(currentModality)) {
@@ -185,23 +141,6 @@ public class POOBkemonGUI extends JFrame {
             instance = new POOBkemonGUI();
         }
         return instance;
-    }
-    private void showConfigurationScreen() {
-        configurationScreen.updateForModality(currentModality);
-        isPlayer1Turn = true; // Resetear para nueva configuración
-        showScreen("ConfigurationScreen");
-    }
-    
-    private void startBattle() {
-        // Configurar los equipos según la modalidad
-        if ("Player vs Player".equals(currentModality)) {
-            // Configurar equipos para PvP
-        } else if ("Player vs Machine".equals(currentModality)) {
-            // Configurar equipo para PvM
-        } else {
-            // Configurar equipos para MvM
-        }
-        showScreen("BattleScreen");
     }
     
     public static void main(String[] args) {
