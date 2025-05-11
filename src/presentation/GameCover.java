@@ -1,70 +1,76 @@
 package presentation;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionListener;
+import javax.swing.*; 
+import java.awt.*; 
+import java.awt.event.*; 
+import java.awt.image.BufferedImage;
 
-/**
- * Pantalla inicial del juego con un GIF de fondo y botón "Next".
- */
-public class GameCover extends JPanel {
+public class GameCover extends JPanel { 
+private JButton continueBtn; private BufferedImage backgroundImage; private final double btnXRatio = 0.45; 
+// Ajusta este valor (0.0 a 1.0) 
+private final double btnYRatio = 0.72; // Ajusta este valor (0.0 a 1.0)
 
-    private JButton nextButton;
+public GameCover() {
+    setLayout(new BorderLayout());
+    loadBackgroundImage();
+    initComponents();
+    addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            updateButtonPosition();
+        }
+    });
+}
 
-    public GameCover() {
-        initComponents();
-    }
-
-    private void initComponents() {
-        // Configuración del panel principal
-        setLayout(new OverlayLayout(this)); // Permite superponer componentes
-        
-        // Cargar GIF de fondo (ruta personalizable)
-        
-    JLabel backgroundLabel = new JLabel();
+private void loadBackgroundImage() {
     try {
-        // Cargar la imagen original
-        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/game_cover.gif"));
-        // Escalar al tamaño deseado (800x600)
-        Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_DEFAULT);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-        backgroundLabel.setIcon(scaledIcon);
+        backgroundImage = javax.imageio.ImageIO.read(
+            getClass().getResource("/resources/images/gameCover.jpg")
+        );
     } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al cargar el GIF", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+            "Error al cargar la imagen de portada",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+        );
     }
-        backgroundLabel.setAlignmentX(0.5f);
-        backgroundLabel.setAlignmentY(0.5f);
+}
 
-        // Panel para el botón (transparente y centrado)
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false);
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 250)); // Ajusta el margen superior
-        
-        // Botón "Next" con estilo
-        nextButton = new JButton("Next");
-        nextButton.setFont(new Font("Pokemon Emerald", Font.BOLD, 24)); // Fuente estilo Pokémon
-        nextButton.setForeground(Color.WHITE);
-        nextButton.setBackground(new Color(0, 150, 0)); // Verde esmeralda
-        nextButton.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30)); // Padding
-        nextButton.setFocusPainted(false);
-        
-        buttonPanel.add(nextButton);
+private void initComponents() {
+    JPanel overlayPanel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        }
+    };
+    overlayPanel.setLayout(null);
+    add(overlayPanel, BorderLayout.CENTER);
 
-        // Añadir componentes al panel principal
-        add(buttonPanel);
-        add(backgroundLabel);
-    }
+    continueBtn = new JButton();
+    continueBtn.setOpaque(false);
+    continueBtn.setContentAreaFilled(false);
+    continueBtn.setBorderPainted(false);
+    overlayPanel.add(continueBtn);
 
-    /**
-     * Permite a la clase principal (POOBkemonGUI) manejar el evento del botón.
-     */
-    public void setNextButtonListener(ActionListener listener) {
-        nextButton.addActionListener(listener);
-    }
+    updateButtonPosition();
+}
 
-    // Tamaño recomendado para la pantalla
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(800, 600); // Resolución base
-    }
+private void updateButtonPosition() {
+    // Tamaño del botón (ajusta según el área del texto "Continue")
+    int btnWidth = (int) (getWidth() * 0.15); // 15% del ancho de la pantalla
+    int btnHeight = (int) (getHeight() * 0.07); // 7% del alto de la pantalla
+
+    // Posición basada en ratios (ajusta btnXRatio y btnYRatio)
+    int x = (int) (getWidth() * btnXRatio-5);
+    int y = (int) (getHeight() * btnYRatio-25);
+
+    continueBtn.setBounds(x, y, btnWidth, btnHeight);
+}
+
+public void setContinueAction(ActionListener listener) {
+    continueBtn.addActionListener(listener);
+}
 }

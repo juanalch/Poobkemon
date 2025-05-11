@@ -2,132 +2,103 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
+import java.awt.event.*;
 
-/**
- * Pantalla para seleccionar la modalidad de juego y el modo (si aplica).
- */
 public class ModalityScreen extends JPanel {
-
-    private JButton continueButton;
-    private JComboBox<String> modeSelector;
-    private ButtonGroup modalityGroup;
-    private JRadioButton pvpButton, pvmButton, mvmButton;
+    private JButton pvpBtn, pvmBtn, mvmBtn, continueBtn, backBtn;
+    private JComboBox<String> modeComboBox;
+    private String selectedModality = null;
 
     public ModalityScreen() {
+        setLayout(new BorderLayout());
         initComponents();
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updateButtonPositions();
+            }
+        });
     }
 
     private void initComponents() {
-        setLayout(new OverlayLayout(this));
+        JPanel overlayPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                try {
+                    ImageIcon background = new ImageIcon(getClass().getResource("/resources/images/mode.jpg"));
+                    g.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), this);
+                } catch (Exception e) {
+                    g.setColor(Color.BLACK);
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        overlayPanel.setLayout(null);
+        add(overlayPanel, BorderLayout.CENTER);
 
-        // Fondo animado
-        // En GameCover.java, ModalityScreen.java y ConfigurationScreen.java
-    JLabel backgroundLabel = new JLabel();
-    try {
-        // Cargar la imagen original
-        ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("resources/images/modality.gif"));
-        // Escalar al tamaño deseado (800x600)
-        Image scaledImage = originalIcon.getImage().getScaledInstance(800, 600, Image.SCALE_DEFAULT);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-        backgroundLabel.setIcon(scaledIcon);
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al cargar el GIF", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-        backgroundLabel.setAlignmentX(0.5f);
-        backgroundLabel.setAlignmentY(0.5f);
+        pvpBtn = createInvisibleButton(overlayPanel);
+        pvmBtn = createInvisibleButton(overlayPanel);
+        mvmBtn = createInvisibleButton(overlayPanel);
+        continueBtn = createInvisibleButton(overlayPanel);
+        backBtn = createInvisibleButton(overlayPanel);
 
-        // Panel de contenido
-        JPanel contentPanel = new JPanel();
-        contentPanel.setOpaque(false);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(100, 0, 0, 0)); // Margen superior
+        modeComboBox = new JComboBox<>(new String[]{"Normal", "Supervivencia"});
+        modeComboBox.setVisible(false);
+        overlayPanel.add(modeComboBox);
 
-        // Título
-        JLabel titleLabel = new JLabel("Selecciona la modalidad");
-        titleLabel.setFont(new Font("Pokemon Emerald", Font.BOLD, 28));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(titleLabel);
-        contentPanel.add(Box.createVerticalStrut(30));
-
-        // Botones de modalidad
-        modalityGroup = new ButtonGroup();
-        pvpButton = createRadioButton("Player vs Player");
-        pvmButton = createRadioButton("Player vs Machine");
-        mvmButton = createRadioButton("Machine vs Machine");
-
-        // Selector de modo (solo para PvP)
-        modeSelector = new JComboBox<>(new String[]{"Modo Normal", "Modo Supervivencia"});
-        modeSelector.setAlignmentX(Component.CENTER_ALIGNMENT);
-        modeSelector.setVisible(false);
-        modeSelector.setMaximumSize(new Dimension(200, 30));
-
-        // Configurar eventos
-        pvpButton.addItemListener(e -> {
-            modeSelector.setVisible(e.getStateChange() == ItemEvent.SELECTED);
-            validate();
+        pvpBtn.addActionListener(e -> {
+            selectedModality = "Player vs Player";
+            showModeSelector();
         });
+        pvmBtn.addActionListener(e -> selectedModality = "Player vs Machine");
+        mvmBtn.addActionListener(e -> selectedModality = "Machine vs Machine");
 
-        // Botón Continuar
-        continueButton = new JButton("Continuar");
-        styleButton(continueButton);
-        continueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Ensamblar componentes
-        contentPanel.add(pvpButton);
-        contentPanel.add(Box.createVerticalStrut(15));
-        contentPanel.add(pvmButton);
-        contentPanel.add(Box.createVerticalStrut(15));
-        contentPanel.add(mvmButton);
-        contentPanel.add(Box.createVerticalStrut(30));
-        contentPanel.add(modeSelector);
-        contentPanel.add(Box.createVerticalStrut(30));
-        contentPanel.add(continueButton);
-
-        add(contentPanel);
-        add(backgroundLabel);
+        updateButtonPositions();
     }
 
-    private JRadioButton createRadioButton(String text) {
-        JRadioButton button = new JRadioButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 18));
-        button.setForeground(Color.WHITE);
+    private JButton createInvisibleButton(JPanel parent) {
+        JButton button = new JButton();
         button.setOpaque(false);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        modalityGroup.add(button);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        parent.add(button);
         return button;
     }
 
-    private void styleButton(JButton button) {
-        button.setFont(new Font("Pokemon Emerald", Font.BOLD, 20));
-        button.setForeground(Color.BLACK);
-        button.setBackground(new Color(255, 203, 5)); // Amarillo Pokémon
-        button.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
-        button.setFocusPainted(false);
+    private void updateButtonPositions() {
+        double cmToPixelX = getWidth() / 23.0;
+        double cmToPixelY = getHeight() / 14.5;
+
+        pvpBtn.setBounds((int) (8.5 * cmToPixelX), (int) (7 * cmToPixelY), (int) ((13.5 - 8.5) * cmToPixelX), (int) ((8 - 7) * cmToPixelY));
+        pvmBtn.setBounds((int) (8.5 * cmToPixelX), (int) (9 * cmToPixelY), (int) ((13.5 - 8.5) * cmToPixelX), (int) ((10 - 9) * cmToPixelY));
+        mvmBtn.setBounds((int) (8.5 * cmToPixelX), (int) (11 * cmToPixelY), (int) ((13.5 - 8.5) * cmToPixelX), (int) ((12 - 11) * cmToPixelY));
+        continueBtn.setBounds((int) (8 * cmToPixelX), (int) (13 * cmToPixelY), (int) ((14 - 8) * cmToPixelX), (int) ((14 - 13) * cmToPixelY));
+        backBtn.setBounds((int) (0.5 * cmToPixelX), (int) (13 * cmToPixelY), (int) ((2 - 0.5) * cmToPixelX), (int) ((14 - 13) * cmToPixelY));
+
+        if (modeComboBox.isVisible()) {
+            modeComboBox.setBounds((int) (8.5 * cmToPixelX), (int) (8.5 * cmToPixelY), (int) ((13.5 - 8.5) * cmToPixelX), 30);
+        }
     }
 
-    // Métodos para integración con POOBkemonGUI
-    public void setContinueButtonListener(ActionListener listener) {
-        continueButton.addActionListener(listener);
+    private void showModeSelector() {
+        modeComboBox.setVisible(true);
+        updateButtonPositions();
+    }
+
+    public void setContinueAction(ActionListener listener) {
+        continueBtn.addActionListener(listener);
+    }
+
+    public void setBackAction(ActionListener listener) {
+        backBtn.addActionListener(listener);
     }
 
     public String getSelectedModality() {
-        if (pvpButton.isSelected()) return "PvP";
-        if (pvmButton.isSelected()) return "PvM";
-        if (mvmButton.isSelected()) return "MvM";
-        return null;
+        return selectedModality;
     }
 
     public String getSelectedMode() {
-        return modeSelector.isVisible() ? 
-            (String) modeSelector.getSelectedItem() : 
-            "Modo Normal";
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(800, 600);
+        return modeComboBox.isVisible() ? (String) modeComboBox.getSelectedItem() : "Normal";
     }
 }

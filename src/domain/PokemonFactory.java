@@ -2,6 +2,7 @@ package domain;
 
 import java.util.*;
 
+
 public class PokemonFactory {
     private static final Map<String, Pokemon> pokemonCatalog = new HashMap<>();
 
